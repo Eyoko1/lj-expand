@@ -32,7 +32,6 @@ sql = lje.secure.pull("sql")
 surface = lje.secure.pull("surface")
 steamworks = lje.secure.pull("steamworks")
 system = lje.secure.pull("system")
-timer = lje.secure.pull("timer")
 util = lje.secure.pull("util")
 vgui = lje.secure.pull("vgui")
 

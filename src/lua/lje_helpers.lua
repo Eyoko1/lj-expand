@@ -112,6 +112,21 @@ lje.con_printf = function(fmt, ...)
     lje.con_print(coloredResult .. "\x1b[0m") -- Reset color at the end
 end
 
+-- Helper function which prints the given message as a success in the console
+lje.con_success = function(message)
+    lje.con_print("\x1b[1;32m[Success] \x1b[0m" .. message .. "\x1b[0m")
+end
+
+-- Helper function which prints the given message as an error in the console (but does not halt)
+lje.con_error = function(message)
+    lje.con_print("\x1b[1;31m[Error] \x1b[0m" .. message .. "\x1b[0m")
+end
+
+-- Helper function which prints the given message as a warning in the console
+lje.con_warn = function(message)
+    lje.con_print("\x1b[1;33m[Warning] \x1b[0m" .. message .. "\x1b[0m")
+end
+
 -- GMod's print is messed up. Just redirect to ours
 function print(...)
     lje.con_print(table.concat({ ... }, "\t"))

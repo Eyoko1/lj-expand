@@ -16,6 +16,21 @@
       "name": "cam.Start2D",
       "type": "function",
       "description": "A polyfill for GMod's `cam.Start2D`, implemented on top of the pulled `cam.Start` function."
+    },
+    {
+      "name": "cam.Start3D",
+      "type": "function",
+      "description": "A polyfill for GMod's `cam.Start3D`, implemented on top of the pulled `cam.Start` function."
+    },
+    {
+      "name": "Lerp",
+      "type": "function",
+      "description": "A polyfill for GMod's `Lerp`."
+    },
+    {
+      "name": "IsValid",
+      "type": "function",
+      "description": "A polyfill for GMod's `IsValid`."
     }
   ],
   "functions": [
@@ -50,6 +65,42 @@
           "type": "any",
           "optional": true,
           "description": "Format arguments, passed to `string.format`."
+        }
+      ],
+      "returns": []
+    },
+    {
+      "name": "con_success",
+      "description": "A helper function which prints the given message as a success into the LJE console.",
+      "params": [
+        {
+          "name": "message",
+          "type": "string",
+          "description": "The message to be outputted."
+        }
+      ],
+      "returns": []
+    },
+    {
+      "name": "con_error",
+      "description": "A helper function which prints the given message as an error into the LJE console.",
+      "params": [
+        {
+          "name": "message",
+          "type": "string",
+          "description": "The message to be outputted."
+        }
+      ],
+      "returns": []
+    },
+    {
+      "name": "con_warn",
+      "description": "A helper function which prints the given message as a warning into the LJE console.",
+      "params": [
+        {
+          "name": "message",
+          "type": "string",
+          "description": "The message to be outputted."
         }
       ],
       "returns": []
