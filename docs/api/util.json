@@ -95,6 +95,24 @@
         }
       ],
       "returns": []
+    },
+    {
+      "name": "deep_copy",
+      "defined_in": "lua",
+      "description": "Recursively copies the given value as with '_G.table.Copy'.",
+      "params": [
+        {
+          "name": "value",
+          "type": "any",
+          "description": "The value to copy."
+        },
+        {
+          "name": "seen",
+          "type": "table",
+          "description": "A map which is used to avoid recursion."
+        }
+      ],
+      "returns": []
     }
   ]
 }

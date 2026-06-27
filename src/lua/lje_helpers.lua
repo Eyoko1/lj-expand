@@ -61,7 +61,7 @@ end
 -- else (functions, userdata, cdata, etc.) is referenced as-is since those can't
 -- be meaningfully duplicated. Cyclic references are preserved via the `seen` map,
 -- and metatables are kept (by reference, as they're shared).
-local function deepCopy(value, seen)
+function lje.util.deep_copy(value, seen)
     if type(value) ~= "table" then
         return value
     end
@@ -75,7 +75,7 @@ local function deepCopy(value, seen)
     seen[value] = copy
 
     for k, v in pairs(value) do
-        copy[k] = deepCopy(v, seen)
+        copy[k] = lje.util.deep_copy(v, seen)
     end
 
     local mt = getmetatable(value)
