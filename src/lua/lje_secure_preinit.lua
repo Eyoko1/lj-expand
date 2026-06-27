@@ -9,8 +9,7 @@ local registry = lje.util.get_registry()
 
 registry["__lje_shadow_registry"][2] = { hook = { Call = function() end } } -- hook ref GMod uses
 registry["__lje_shadow_registry"][1337153] = function() return "hello" end
-registry["__lje_shadow_registry"][13371010] = function() return end         -- Dummy Lua function
-
+registry["__lje_shadow_registry"][13371010] = function() end         -- Dummy Lua function
 
 -- Only a subset of necessary GMod C APIs are pulled in. We have our own versions of any base library as well.
 achievements = lje.secure.pull("achievements")
@@ -75,31 +74,38 @@ function cam.Start2D()
 end
 
 -- Small hook library replacement, no returns for now.
+local hooklisteners = {}
 hook = {}
-hook._listeners = {}
+hook._listeners = hooklisteners
 
 function hook.Add(event, identifier, func)
     local script = lje.env.current_script()
-    hook._listeners[script] = hook._listeners[script] or {}
-    if not hook._listeners[script][event] then
-        hook._listeners[script][event] = {}
+    local events = hooklisteners[script]
+    if not events then
+        events = {}
+        hooklisteners[script] = events
     end
-    hook._listeners[script][event][identifier] = func
+
+    local callbacks = events[event]
+    if not callbacks then
+        callbacks = {}
+        events[event] = callbacks
+    end
+
+    callbacks[identifier] = func
 end
 
 function hook.Listen()
     local script = lje.env.current_script()
-    if not hook._listeners[script] then
-        hook._listeners[script] = {}
+    if not hooklisteners[script] then
+        hooklisteners[script] = {}
     end
 
-    lje.vm.set_engine_call_hook(function(func, nargs, nresults, ...)
-        local name = ...
-        local listeners = hook._listeners
-        local callbacks = listeners[script][name]
+    lje.vm.set_engine_call_hook(function(func, nargs, nresults, name, ...)
+        local callbacks = hooklisteners[script][name]
         if callbacks then
             for _, listener in pairs(callbacks) do
-                listener(...)
+                listener(name, ...)
             end
         end
     end)
