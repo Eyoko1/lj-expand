@@ -1916,7 +1916,7 @@ lje_detour_export(mod, lua_newuserdata, lua_newuserdata);
       lje_detour_export(mod, luaL_checkany, luaL_checkany);
       lje_detour_export(mod, luaL_checkudata, luaL_checkudata);
 
-      // Errors (variadic — likely your current culprit)
+      // Errors
       lje_detour_export(mod, luaL_error, luaL_error);
       lje_detour_export(mod, luaL_argerror, luaL_argerror);
       lje_detour_export(mod, luaL_typerror, luaL_typerror);
