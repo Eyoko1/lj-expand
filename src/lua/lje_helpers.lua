@@ -2,58 +2,58 @@
 -- logic (no C API pulls, registry hacks or metatable setup) -- only self-contained
 -- helper functions. It runs alongside lje_secure_preinit.lua.
 
+local function valueToString(v, indent, seen)
+    local t = type(v)
+
+    if t == "string" then
+        return '"' .. v .. '"'
+    elseif t == "number" or t == "boolean" then
+        return tostring(v)
+    elseif t == "nil" then
+        return "nil"
+    elseif t ~= "table" then
+        -- function, userdata, thread, cdata, etc.
+        return "<" .. t .. ": " .. tostring(v) .. ">"
+    end
+
+    seen = seen or {}
+
+    -- It's a table from here on.
+    if seen[v] then
+        return "<recursion: " .. tostring(v) .. ">"
+    end
+    seen[v] = true
+
+    local childIndent = indent .. "  "
+    local out = "{\n"
+    local isEmpty = true
+
+    for k, val in pairs(v) do
+        isEmpty = false
+
+        local keyStr
+        if type(k) == "string" then
+            keyStr = k
+        else
+            keyStr = "[" .. tostring(k) .. "]"
+        end
+
+        out = out .. childIndent .. keyStr .. " = " .. valueToString(val, childIndent, seen) .. ",\n"
+    end
+
+    -- Allow this table to be visited again on sibling branches once we're done with it.
+    seen[v] = nil
+
+    if isEmpty then
+        return "{}"
+    end
+
+    return out .. indent .. "}"
+end
+
 -- Neatly print out any value using lje.con_print. Handles nested tables with
 -- indentation and guards against recursive (cyclic) references.
 function lje.util.inspect(x)
-    local seen = {}
-
-    local function valueToString(v, indent)
-        local t = type(v)
-
-        if t == "string" then
-            return '"' .. v .. '"'
-        elseif t == "number" or t == "boolean" then
-            return tostring(v)
-        elseif t == "nil" then
-            return "nil"
-        elseif t ~= "table" then
-            -- function, userdata, thread, cdata, etc.
-            return "<" .. t .. ": " .. tostring(v) .. ">"
-        end
-
-        -- It's a table from here on.
-        if seen[v] then
-            return "<recursion: " .. tostring(v) .. ">"
-        end
-        seen[v] = true
-
-        local childIndent = indent .. "  "
-        local out = "{\n"
-        local isEmpty = true
-
-        for k, val in pairs(v) do
-            isEmpty = false
-
-            local keyStr
-            if type(k) == "string" then
-                keyStr = k
-            else
-                keyStr = "[" .. tostring(k) .. "]"
-            end
-
-            out = out .. childIndent .. keyStr .. " = " .. valueToString(val, childIndent) .. ",\n"
-        end
-
-        -- Allow this table to be visited again on sibling branches once we're done with it.
-        seen[v] = nil
-
-        if isEmpty then
-            return "{}"
-        end
-
-        return out .. indent .. "}"
-    end
-
     lje.con_print(valueToString(x, ""))
 end
 
