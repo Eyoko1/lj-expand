@@ -73,6 +73,54 @@ function cam.Start2D()
     cam.Start(cam2D)
 end
 
+local cam3D = {
+    type = "3D"
+}
+function cam.Start3D(pos, ang, fov, x, y, w, h, znear, zfar)
+    cam3D.origin = pos
+    cam3D.angles = ang
+
+    if (fov) then cam3D.fov = fov end
+
+    if (x and y and w and h) then
+        cam3D.x	= x
+        cam3D.y	= y
+        cam3D.w	= w
+        cam3D.h	= h
+        cam3D.aspect = (w / h)
+    end
+
+    if (znear and zfar) then
+        cam3D.znear	= znear
+        cam3D.zfar	= zfar
+    end
+
+    return cam.Start(cam3D)
+end
+
+function Lerp(t, a, b)
+    if (t > 1) then
+        return b
+    end
+    if (t < 0) then
+        return a
+    end
+    return a + ((b - a) * t)
+end
+
+function IsValid(object)
+    if (not object) then
+        return false
+    end
+
+    local isvalid = object.IsValid
+    if (not isvalid) then
+        return false
+    end
+
+    return isvalid(object)
+end
+
 -- Small hook library replacement, no returns for now.
 local hooklisteners = {}
 hook = {}
