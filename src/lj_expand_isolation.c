@@ -56,10 +56,9 @@ lua_State* lje_create_isolated_state() {
     lj_dispatch_init((GG_State*)L);
 
     // Create the shadow registry
-  lua_newtable(L);
-  LJEG()->shadow_registry = tabV(L->top - 1);
-  lua_setfield(L, LUA_REGISTRYINDEX, "__lje_shadow_registry");
-
+    lua_newtable(L);
+    LJEG()->shadow_registry = tabV(L->top - 1);
+    lua_setfield(L, LUA_REGISTRYINDEX, "__lje_shadow_registry");
 
     LJE_SUCCESS("Created isolated Lua state: %p", (void*)L);
     return L;

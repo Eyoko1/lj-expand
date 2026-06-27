@@ -532,56 +532,6 @@ static int lje_proxy_copy(lua_State* L)
   return 1;
 }
 
-static int lje_debug_setupvalue(lua_State* L)
-{
-  lj_lib_checkany(L, 3);
-  
-  // Version of debug_getupvalue excluding the path for getting the value
-  int32_t n = lj_lib_checkint(L, 2);
-  const char *name;
-  lj_lib_checkfunc(L, 1);
-  name = lua_setupvalue(L, 1, n);
-  if (name)
-  {
-    lua_pushstring(L, name);
-    return 1;
-  }
-
-  return 0;
-}
-
-static int lje_jit_funck(lua_State* L)
-{
-  GCproto *pt = lj_lib_checkLproto(L, 1, 0);
-  ptrdiff_t idx = (ptrdiff_t)lj_lib_checkint(L, 2);
-  if (idx >= 0) {
-    if (idx < (ptrdiff_t)pt->sizekn) {
-      copyTV(L, L->top-1, proto_knumtv(pt, idx));
-      return 1;
-    }
-  } else {
-    if (~idx < (ptrdiff_t)pt->sizekgc) {
-      GCobj *gc = proto_kgc(pt, idx);
-      setgcV(L, L->top-1, gc, ~gc->gch.gct);
-      return 1;
-    }
-  }
-
-  return 0;
-}
-
-static int lje_jit_funcuvname(lua_State* L)
-{
-  GCproto *pt = lj_lib_checkLproto(L, 1, 0);
-  uint32_t idx = (uint32_t)lj_lib_checkint(L, 2);
-  if (idx < pt->sizeuv) {
-    setstrV(L, L->top-1, lj_str_newz(L, lj_debug_uvname(pt, idx)));
-    return 1;
-  }
-
-  return 0;
-}
-
 #define LJE_SET_FUNC(name, func) \
   lua_pushcfunction(L, func); \
   lua_setfield(L, -2, name);
@@ -683,17 +633,6 @@ void lje_addfuncs(lua_State* L) {
   /* LJE API END */
 
   lua_setfield(L, -2, "lje");
-
-  // Re-add disabled functions to debug.*
-  lua_getfield(L, -2, "debug");
-  LJE_SET_FUNC("setupvalue", lje_debug_setupvalue);
-  lua_pop(L, 1);
-
-  // Re-add disabled functions to jit.*
-  lua_getfield(L, -2, "jit");
-  LJE_SET_FUNC("funck", lje_jit_funck)
-  LJE_SET_FUNC("funcuvname", lje_jit_funcuvname)
-  lua_pop(L, 1);
 
   lua_pop(L, 1); // Pop globals table
 
