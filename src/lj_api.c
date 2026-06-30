@@ -1346,7 +1346,7 @@ LUA_API int lua_pcall(lua_State *L, int nargs, int nresults, int errfunc)
 {
   lje_redirect_state(L);
 
-  if (tvisfunc(L->base) && LJEG()->waiting_for_init_call)
+  if (LJ_UNLIKELY(LJEG()->waiting_for_init_call && tvisfunc(L->base)))
   {
     LJEG()->waiting_for_init_call = 0;
     LJEG()->using_error_reporter = 1;
@@ -1370,7 +1370,7 @@ LUA_API int lua_pcall(lua_State *L, int nargs, int nresults, int errfunc)
   }
 
   /* LJE: Next, check if we're waiting for the startup call. */
-  if (tvisfunc(L->base) && LJEG()->waiting_for_startup_call)
+  if (LJ_UNLIKELY(LJEG()->waiting_for_startup_call && tvisfunc(L->base)))
   {
     LJEG()->waiting_for_startup_call = 0;
 
@@ -1418,17 +1418,11 @@ LUA_API int lua_pcall(lua_State *L, int nargs, int nresults, int errfunc)
   {
     GCfunc* f = funcV(stkindex2adr(L, errfunc));
     char is_function_null = f == LJ_GCVMASK || (uintptr_t)f == 0x0000400000000000;
-    if (is_function_null)
+    if (LJ_UNLIKELY(is_function_null))
     {
       LJE_WARN("errfunc is set but function is null. This is unexpected, but we'll try to continue anyway.");
       LJE_WARN("This often signals the stack is corrupted. Prepare for potential crash.");
-    }
-
-    char is_adv_error_reporter = 0;
-    if (!is_function_null)
-      is_adv_error_reporter = iscfunc(f) ? f->c.f == LJEG()->adv_error_reporter : 0;
-
-    if (is_adv_error_reporter)
+    } else if (iscfunc(f) && f->c.f == LJEG()->adv_error_reporter)
     {
       /* LJE: Call our engine hooks, if we have any. */
       for (size_t i = 0; i < LJEG()->loaded_script_count; i++) {
@@ -1519,6 +1513,7 @@ LUA_API int lua_pcall(lua_State *L, int nargs, int nresults, int errfunc)
     }
   }
 
+  /*
   if (LJEG()->isolated_state == L && errfunc)
   {
     // Ensure it's not nil. This can sometimes happen, for reasons still unknown to me. Anyway, if its, just set to 0 so we handle it.
@@ -1529,6 +1524,7 @@ LUA_API int lua_pcall(lua_State *L, int nargs, int nresults, int errfunc)
       __debugbreak();
     }
   }
+  */
 
   global_State *g = G(L);
   uint8_t oldh = hook_save(g);

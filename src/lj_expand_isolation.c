@@ -240,10 +240,11 @@ static int copy_to_isolated_state(lua_State* from, lua_State* to, cTValue* val, 
                 cTValue* meta_name = lj_tab_getstr_lit(mt_src, "MetaName");
                 if (meta_name && tvisstr(meta_name))
                 {
-                    const char* name = strdata(strV(meta_name));
+                    GCstr* str = strV(meta_name);
+                    const char* name = strdata(str);
                     // Check if the to state has its own version already (metatables can be manipulated)
                     GCtab* to_reg = tabV(registry(LJEG()->isolated_state)); /* not shadow, metatables are stored in main */
-                    cTValue* to_metatable = lj_tab_getstr_raw(to_reg, name, strlen(name)); // Can't use raw GCstr, comes from the from state
+                    cTValue* to_metatable = lj_tab_getstr_raw(to_reg, name, str->len); // Can't use raw GCstr, comes from the from state
                     if (to_metatable && tvistab(to_metatable))
                     {
                         // This metatable exists within the to state, so use it.

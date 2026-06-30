@@ -28,6 +28,7 @@ typedef enum LJEPathOpKind
 typedef struct LJEPathIndexOp
 {
   char key[LJE_PATH_STR_MAX];
+  int length;
 } LJEPathIndexOp;
 
 typedef struct LJEPathUpvalueOp
@@ -57,6 +58,7 @@ typedef struct LJEPath
   int num_ops;
   LJEPathOp ops[LJE_PATH_MAX_OPS];
   char str[LJE_PATH_STR_MAX];
+  int length;
 } LJEPath;
 
 // Handlers may return false to signal an unrecoverable error (i.e. indexing a non-table type)
@@ -88,6 +90,7 @@ static int method_index(lua_State* L)
   op->kind = LJE_PATH_OP_INDEX;
   strncpy(op->index.key, key, LJE_PATH_STR_MAX - 1);
   op->index.key[LJE_PATH_STR_MAX - 1] = '\0';
+  op->index.length = strlen(op->index.key);
 
   lua_pushvalue(L, 1); // Daisy-chain
   return 1;
@@ -143,7 +146,7 @@ static int method_copy(lua_State* L)
   // by indexing it into the global state of the target
   lua_State* T = path->target_state;
   GCtab* env = tabref(T->env);
-  cTValue* root = lj_tab_getstr_raw(env, path->str, strlen(path->str));
+  cTValue* root = lj_tab_getstr_raw(env, path->str, path->length);
   if (!root)
   {
     LJE_WARN("Path root '%s' not found in target state", path->str);
@@ -210,6 +213,7 @@ int lje_state_path(lua_State* L)
   path_ud->num_ops = 0;
   strncpy(path_ud->str, path, LJE_PATH_STR_MAX - 1);
   path_ud->str[LJE_PATH_STR_MAX - 1] = '\0';
+  path_ud->length = strlen(path_ud->str);
 
   // Apply metatable
   initialize_mt(L);
@@ -242,7 +246,7 @@ bool index_path_op(lua_State* target_state, TValue* current_object, LJEPathOp* o
   }
 
   GCtab* tab = tabV(current_object);
-  cTValue* value = lj_tab_getstr_raw(tab, op->index.key, strlen(op->index.key));
+  cTValue* value = lj_tab_getstr_raw(tab, op->index.key, op->index.length);
   if (!value)
   {
     LJE_WARN("Index path op: key '%s' not found in table", op->index.key);
